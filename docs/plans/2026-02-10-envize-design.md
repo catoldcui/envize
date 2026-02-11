@@ -90,6 +90,120 @@ Three commands manage the active set:
 
 All commands support `--json` for structured JSON output.
 
+## Architecture
+
+```
+                          ┌─────────────────────┐
+                          │     CLI Parser       │
+                          │  (clap / argparse)   │
+                          └──────────┬──────────┘
+                                     │
+                 ┌───────────────────┼───────────────────┐
+                 │                   │                    │
+          mutating cmds        query cmds           mgmt cmds
+       (use, add, remove,  (status, which,      (create, edit, rm,
+            reset)          explain, ls)        import, export, init)
+                 │                   │                    │
+                 ▼                   │                    │
+    ┌────────────────────┐           │                    │
+    │  2. Profile        │◄──────────┼────────────────────┘
+    │     Resolver       │           │
+    │  (merge, conflict  │           │
+    │   detection)       │           │
+    └────────┬───────────┘           │
+             │                       │
+             ▼                       │
+    ┌────────────────────┐           │
+    │  1. Profile Store  │◄──────────┘
+    │  (read/write .env, │
+    │   global + local,  │◄──────────────────────┐
+    │   metadata parse)  │                       │
+    └────────┬───────────┘                       │
+             │                                   │
+             │ resolved env map                  │
+             ▼                                   │
+    ┌────────────────────┐              ┌────────────────────┐
+    │  3. Shell Adapter  │              │  7. Dotenv Bridge  │
+    │                    │              │                    │
+    │  --emit-shell:     │              │  import: .env →    │
+    │    export/unset    │              │    profile (copy   │
+    │  --emit-human:     │              │    + add metadata) │
+    │    confirmation    │              │  export: state →   │
+    └──┬─────────┬───────┘              │    .env file       │
+       │         │                      └────────────────────┘
+       │         │ --persist
+       │         ▼
+       │  ┌────────────────────┐
+       │  │  5. System Env     │
+       │  │     Writer         │
+       │  │                    │
+       │  │  ~/.envize/        │
+       │  │    active.sh       │
+       │  └────────────────────┘
+       │
+       │ on every use/add/remove/reset
+       ▼
+    ┌────────────────────┐
+    │  4. State Manager  │
+    │                    │
+    │  ~/.envize/        │
+    │    state.json      │
+    │                    │
+    │  • active_profiles │
+    │  • variables       │──────────► read by: status,
+    │  • snapshot        │            which, explain, reset
+    │  • applied_at      │
+    └────────────────────┘
+
+    ┌────────────────────┐        ┌────────────────────┐
+    │  6. Template       │        │  8. Output         │
+    │     Engine         │        │     Formatter      │
+    │                    │        │                    │
+    │  built-in .env     │        │  • colored TTY     │
+    │  templates →       │        │  • --json          │
+    │  local profiles    │        │  • explain (text)  │
+    └────────────────────┘        │  • value masking   │
+                                  └────────────────────┘
+                                         ▲
+                                         │
+                                   used by all cmds
+
+
+─────────────────────────────────────────────────────────
+  Shell Function Wrapper (bash/zsh/fish)
+  Injected by `envize install` into rc file
+
+  envize use/add/remove/reset → eval $(envize ... --emit-shell)
+  envize *                    → passthrough to binary
+─────────────────────────────────────────────────────────
+```
+
+### Data Flow: `envize use claude aws-staging`
+
+```
+Shell Wrapper
+  │
+  ▼
+CLI Parser → Profile Resolver → Profile Store (reads .env files)
+                  │
+                  ▼ merged env map
+             Shell Adapter (generates export commands)
+                  │
+                  ├──► stdout: export commands (eval'd by wrapper)
+                  ├──► State Manager (writes state.json)
+                  └──► Output Formatter → stderr: "Activated: claude, aws-staging"
+```
+
+### Data Flow: `envize import .env.staging --name staging`
+
+```
+CLI Parser → Dotenv Bridge
+                  │
+                  ├──► copies .env.staging → .envize/profiles/staging.env
+                  ├──► adds @description, @tags metadata if missing
+                  └──► Output Formatter → "Imported: staging (5 variables)"
+```
+
 ## Key Components
 
 ### 1. Profile Store
