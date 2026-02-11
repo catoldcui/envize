@@ -17,7 +17,7 @@ export function createRemoveCommand(
   return new Command('remove')
     .description('Remove profiles from the currently active set')
     .argument('<profiles...>', 'Profile names to remove')
-    .option('--persist', 'Also remove from persisted state')
+    .option('--global', 'Also remove from global (cross-session) state')
     .option('--emit-shell', 'Output shell commands for eval')
     .option('--emit-human', 'Output human-readable confirmation')
     .action(async (profileNames: string[], options) => {
@@ -64,7 +64,7 @@ export function createRemoveCommand(
           // Update state
           stateManager.removeProfiles(toRemove, toKeep, toUnset);
           
-          if (options.persist) {
+          if (options.global) {
             systemEnvWriter.update(toSet, toUnset);
           }
           
@@ -84,7 +84,7 @@ export function createRemoveCommand(
         // Default mode
         stateManager.removeProfiles(toRemove, toKeep, toUnset);
 
-        if (options.persist) {
+        if (options.global) {
           systemEnvWriter.update(toSet, toUnset);
         }
 
@@ -94,7 +94,7 @@ export function createRemoveCommand(
             removed_profiles: toRemove,
             remaining_profiles: remainingProfiles,
             unset_variables: toUnset,
-            persisted: options.persist ?? false,
+            global: options.global ?? false,
           };
           console.log(JSON.stringify(output, null, 2));
         } else {

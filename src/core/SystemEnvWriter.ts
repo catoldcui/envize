@@ -4,7 +4,7 @@ import { ShellAdapter } from './ShellAdapter.js';
 import * as path from 'node:path';
 
 /**
- * SystemEnvWriter - writes/clears ~/.envize/active.sh for --persist mode
+ * SystemEnvWriter - writes/clears ~/.envize/active.sh for --global mode
  */
 export class SystemEnvWriter {
   private activeShPath: string;
@@ -23,7 +23,7 @@ export class SystemEnvWriter {
   }
 
   /**
-   * Write environment variables to the persist file
+   * Write environment variables to the global file
    */
   write(variables: Record<string, string>): void {
     ensureDir(path.dirname(this.activeShPath));
@@ -43,7 +43,7 @@ export class SystemEnvWriter {
   }
 
   /**
-   * Clear the persist file (for reset --persist)
+   * Clear the global file (for reset --global)
    */
   clear(): void {
     if (fileExists(this.activeShPath)) {
@@ -52,14 +52,14 @@ export class SystemEnvWriter {
   }
 
   /**
-   * Check if the persist file exists
+   * Check if the global file exists
    */
   exists(): boolean {
     return fileExists(this.activeShPath);
   }
 
   /**
-   * Read the current persisted variables
+   * Read the current global variables
    */
   read(): Record<string, string> {
     if (!this.exists()) {
@@ -96,7 +96,7 @@ export class SystemEnvWriter {
   }
 
   /**
-   * Update specific variables in the persist file
+   * Update specific variables in the global file
    * Preserves existing variables not in the update
    */
   update(

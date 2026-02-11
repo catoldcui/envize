@@ -12,7 +12,7 @@ export function createResetCommand(
 ): Command {
   return new Command('reset')
     .description('Restore shell to pre-envize state (removes all)')
-    .option('--persist', 'Also clear persisted state')
+    .option('--global', 'Also clear global (cross-session) state')
     .option('--emit-shell', 'Output shell commands for eval')
     .option('--emit-human', 'Output human-readable confirmation')
     .action(async (options) => {
@@ -59,7 +59,7 @@ export function createResetCommand(
           // Clear state
           stateManager.clear();
           
-          if (options.persist) {
+          if (options.global) {
             systemEnvWriter.clear();
           }
           
@@ -75,7 +75,7 @@ export function createResetCommand(
         // Default mode
         stateManager.clear();
 
-        if (options.persist) {
+        if (options.global) {
           systemEnvWriter.clear();
         }
 
@@ -84,7 +84,7 @@ export function createResetCommand(
             action: 'reset',
             unset_variables: toUnset,
             restored_variables: Object.keys(toRestore),
-            persisted: options.persist ?? false,
+            global: options.global ?? false,
           };
           console.log(JSON.stringify(output, null, 2));
         } else {

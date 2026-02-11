@@ -92,7 +92,7 @@ describe('use command integration', () => {
     expect(commands).toContain("export KEY='value'");
   });
 
-  it('should write to persist file when persist option is used', () => {
+  it('should write to global file when global option is used', () => {
     fs.writeFileSync(path.join(globalDir, 'test.env'), 'KEY=value');
 
     const resolved = resolver.resolve(['test']);

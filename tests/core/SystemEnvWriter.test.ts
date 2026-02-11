@@ -46,7 +46,7 @@ describe('SystemEnvWriter', () => {
   });
 
   describe('clear', () => {
-    it('should delete the persist file', () => {
+    it('should delete the global file', () => {
       fs.writeFileSync(activeShPath, 'some content');
       expect(fs.existsSync(activeShPath)).toBe(true);
 

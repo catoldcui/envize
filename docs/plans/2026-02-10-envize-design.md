@@ -70,11 +70,11 @@ Three commands manage the active set:
 |---|---|
 | `envize install` | One-time setup: injects shell function wrapper into shell config |
 | `envize use <profiles...>` | Apply one or more profiles to current shell (replaces active set) |
-| `envize use <profiles...> --persist` | Apply and persist across shell sessions |
+| `envize use <profiles...> --global` | Apply globally across shell sessions |
 | `envize add <profiles...>` | Add profiles to the currently active set |
 | `envize remove <profiles...>` | Remove profiles from the currently active set |
 | `envize reset` | Restore shell to pre-envize state (removes all) |
-| `envize reset --persist` | Remove persisted env vars from shell hook file |
+| `envize reset --global` | Remove global env vars from shell hook file |
 | `envize status` | Show active profiles and all set variables with source |
 | `envize which <VAR>` | Show which profile set a variable and its value |
 | `envize create <name>` | Create a new profile interactively |
@@ -131,7 +131,7 @@ All commands support `--json` for structured JSON output.
     │    confirmation    │              │  export: state →   │
     └──┬─────────┬───────┘              │    .env file       │
        │         │                      └────────────────────┘
-       │         │ --persist
+       │         │ --global
        │         ▼
        │  ┌────────────────────┐
        │  │  5. System Env     │
@@ -308,14 +308,14 @@ Tracks what is currently active so `status`, `reset`, and `which` have a source 
 
 Updated on every `envize use` and `envize reset`. Read by `status`, `which`, and `explain`.
 
-### 5. System Env Writer (for `--persist`)
+### 5. System Env Writer (for `--global`)
 
-Writes env vars to the shell hook file for cross-session persistence:
+Writes env vars to the shell hook file for cross-session global persistence:
 
-- Writes `~/.envize/active.sh` containing export statements for the persisted variables
+- Writes `~/.envize/active.sh` containing export statements for the global variables
 - The shell function wrapper sources this file on shell startup (injected during `envize install`)
 
-`envize reset --persist` clears `~/.envize/active.sh` and removes persisted variables.
+`envize reset --global` clears `~/.envize/active.sh` and removes global variables.
 
 > **v2 scope (deferred from v1):** System-level persistence via `launchctl setenv` (macOS), `/etc/environment` (Linux), and registry `setx` (Windows). These are higher-risk operations that require platform-specific testing and privilege escalation handling.
 
@@ -365,7 +365,7 @@ $ envize install
   -> Detects shell (bash/zsh/fish)
   -> Injects shell function wrapper into ~/.zshrc (or ~/.bashrc, config.fish)
   -> Creates ~/.envize/profiles/ directory
-  -> Creates ~/.envize/active.sh (for persist mode)
+  -> Creates ~/.envize/active.sh (for global mode)
 
 # Create a profile from template
 $ envize init --template claude
@@ -388,7 +388,7 @@ $ envize status
   -> Shows active profiles and all variables with source
 
 # Persist across shell sessions
-$ envize use claude --persist
+$ envize use claude --global
   -> Writes exports to ~/.envize/active.sh
   -> Sourced automatically on new shell sessions
 
@@ -413,7 +413,7 @@ $ envize export --dotenv > .env
 - **Shells:** bash, zsh, fish
 - **Core commands:** `install`, `use`, `add`, `remove`, `reset`, `status`, `which`, `ls`, `create`, `edit`, `rm`
 - **Composability:** multi-profile merging with last-wins conflict resolution
-- **Persist mode:** shell-level only (`~/.envize/active.sh`)
+- **Global mode:** shell-level only (`~/.envize/active.sh`)
 - **State tracking:** `~/.envize/state.json` for active profile state
 - **Dotenv bridge:** `import` and `export --dotenv`
 - **Templates:** Claude, OpenAI, AWS, Supabase, Stripe, Vercel

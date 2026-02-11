@@ -17,7 +17,7 @@ export function createAddCommand(
   return new Command('add')
     .description('Add profiles to the currently active set')
     .argument('<profiles...>', 'Profile names to add')
-    .option('--persist', 'Persist across shell sessions')
+    .option('--global', 'Apply globally across all shell sessions')
     .option('--emit-shell', 'Output shell commands for eval')
     .option('--emit-human', 'Output human-readable confirmation')
     .action(async (profileNames: string[], options) => {
@@ -73,7 +73,7 @@ export function createAddCommand(
           // Update state
           stateManager.addProfiles(newProfiles, resolved.variables);
           
-          if (options.persist) {
+          if (options.global) {
             systemEnvWriter.update(toSet, []);
           }
           
@@ -93,7 +93,7 @@ export function createAddCommand(
         // Default mode
         stateManager.addProfiles(newProfiles, resolved.variables);
 
-        if (options.persist) {
+        if (options.global) {
           systemEnvWriter.update(toSet, []);
         }
 
@@ -103,7 +103,7 @@ export function createAddCommand(
             added_profiles: newProfiles,
             active_profiles: allProfiles,
             new_variables: toSet,
-            persisted: options.persist ?? false,
+            global: options.global ?? false,
           };
           console.log(JSON.stringify(output, null, 2));
         } else {

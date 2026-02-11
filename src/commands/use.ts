@@ -18,7 +18,7 @@ export function createUseCommand(
   return new Command('use')
     .description('Apply one or more profiles to current shell (replaces active set)')
     .argument('<profiles...>', 'Profile names to activate')
-    .option('--persist', 'Persist across shell sessions')
+    .option('--global', 'Apply globally across all shell sessions')
     .option('--emit-shell', 'Output shell commands for eval')
     .option('--emit-human', 'Output human-readable confirmation')
     .action(async (profileNames: string[], options) => {
@@ -64,8 +64,8 @@ export function createUseCommand(
           // Update state
           stateManager.update(profileNames, resolved.variables);
           
-          // Handle persist
-          if (options.persist) {
+          // Handle global
+          if (options.global) {
             systemEnvWriter.write(toSet);
           }
           
@@ -87,8 +87,8 @@ export function createUseCommand(
         // Update state
         stateManager.update(profileNames, resolved.variables);
 
-        // Handle persist
-        if (options.persist) {
+        // Handle global
+        if (options.global) {
           systemEnvWriter.write(toSet);
         }
 
@@ -99,7 +99,7 @@ export function createUseCommand(
             profiles: profileNames,
             variables: resolved.variables,
             conflicts: resolved.conflicts,
-            persisted: options.persist ?? false,
+            global: options.global ?? false,
           };
           console.log(JSON.stringify(output, null, 2));
         } else {

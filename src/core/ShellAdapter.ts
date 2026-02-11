@@ -132,7 +132,7 @@ envize() {
   esac
 }
 
-# Source persisted env vars if they exist
+# Source global env vars if they exist
 if [ -f "$HOME/.envize/active.sh" ]; then
   source "$HOME/.envize/active.sh"
 fi
@@ -160,7 +160,7 @@ function envize
   end
 end
 
-# Source persisted env vars if they exist
+# Source global env vars if they exist
 if test -f "$HOME/.envize/active.fish"
   source "$HOME/.envize/active.fish"
 end

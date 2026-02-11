@@ -78,7 +78,7 @@ export function getStatePath(): string {
 }
 
 /**
- * Get the active.sh file path for persist mode
+ * Get the active.sh file path for global mode
  */
 export function getActiveShPath(): string {
   return path.join(getGlobalDir(), 'active.sh');
