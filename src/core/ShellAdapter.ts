@@ -116,7 +116,7 @@ export class ShellAdapter {
 # envize shell function wrapper
 envize() {
   case "$1" in
-    use|add|remove|reset)
+    use|add|unuse|reset)
       local output
       output="$(command envize "$@" --emit-shell 2>/dev/null)"
       if [ $? -eq 0 ]; then
@@ -147,7 +147,7 @@ fi
 # envize shell function wrapper
 function envize
   switch $argv[1]
-    case use add remove reset
+    case use add unuse reset
       set -l output (command envize $argv --emit-shell 2>/dev/null)
       if test $status -eq 0
         eval $output

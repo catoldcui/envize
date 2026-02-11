@@ -134,7 +134,7 @@ export class ProfileResolver {
     // Resolve remaining profiles
     const remaining = remainingProfileNames.length > 0
       ? this.resolve(remainingProfileNames)
-      : { variables: {} };
+      : { variables: {} as Record<string, EnvVariable> };
 
     // Check each current variable
     for (const [key, envVar] of Object.entries(currentVariables)) {

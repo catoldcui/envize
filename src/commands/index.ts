@@ -1,7 +1,7 @@
 export { createInstallCommand } from './install.js';
 export { createUseCommand } from './use.js';
 export { createAddCommand } from './add.js';
-export { createRemoveCommand } from './remove.js';
+export { createUnuseCommand } from './unuse.js';
 export { createResetCommand } from './reset.js';
 export { createStatusCommand } from './status.js';
 export { createWhichCommand } from './which.js';

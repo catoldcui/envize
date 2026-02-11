@@ -174,9 +174,9 @@ export class OutputFormatter {
   }
 
   /**
-   * Format remove profiles confirmation
+   * Format unuse profiles confirmation
    */
-  formatRemove(
+  formatUnuse(
     removedProfiles: string[],
     remainingProfiles: string[],
     unsetCount: number

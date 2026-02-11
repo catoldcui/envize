@@ -26,7 +26,7 @@ export function createRmCommand(
         const activeProfiles = stateManager.getActiveProfiles();
         if (activeProfiles.includes(name)) {
           console.error(formatter.formatWarning(`Profile "${name}" is currently active.`));
-          console.error(formatter.formatInfo('Run "envize remove ' + name + '" first to deactivate it.'));
+          console.error(formatter.formatInfo('Run "envize unuse ' + name + '" first to deactivate it.'));
           
           if (!options.force) {
             process.exit(1);

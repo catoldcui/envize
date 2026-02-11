@@ -18,8 +18,13 @@ export function createResetCommand(
     .action(async (options) => {
       try {
         const state = stateManager.load();
-        
+
         if (!stateManager.hasActiveProfiles()) {
+          // Still need to clear global file if --global is specified
+          if (options.global) {
+            systemEnvWriter.clear();
+          }
+
           if (options.emitShell) {
             console.log('');
             return;

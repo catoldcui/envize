@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(command envize reset:*)",
+      "Bash(node -e:*)",
+      "Bash(command envize use:*)",
+      "Bash(command envize ls:*)",
+      "Bash(envize reset:*)",
+      "Bash(test:*)",
+      "Bash(npm test:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git stash:*)"
+    ]
+  }
+}

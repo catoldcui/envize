@@ -6,7 +6,7 @@ import { StateManager } from '../core/StateManager.js';
 import { SystemEnvWriter } from '../core/SystemEnvWriter.js';
 import { OutputFormatter } from '../core/OutputFormatter.js';
 
-export function createRemoveCommand(
+export function createUnuseCommand(
   formatter: OutputFormatter,
   store: ProfileStore,
   resolver: ProfileResolver,
@@ -14,9 +14,9 @@ export function createRemoveCommand(
   shellAdapter: ShellAdapter,
   systemEnvWriter: SystemEnvWriter
 ): Command {
-  return new Command('remove')
-    .description('Remove profiles from the currently active set')
-    .argument('<profiles...>', 'Profile names to remove')
+  return new Command('unuse')
+    .description('Deactivate profiles from the currently active set')
+    .argument('<profiles...>', 'Profile names to deactivate')
     .option('--global', 'Also remove from global (cross-session) state')
     .option('--emit-shell', 'Output shell commands for eval')
     .option('--emit-human', 'Output human-readable confirmation')
@@ -28,7 +28,7 @@ export function createRemoveCommand(
 
         // Filter to only profiles that are actually active
         const toRemove = profileNames.filter(p => currentProfiles.includes(p));
-        
+
         if (toRemove.length === 0) {
           if (options.emitShell) {
             console.log('');
@@ -60,19 +60,19 @@ export function createRemoveCommand(
         if (options.emitShell) {
           const commands = shellAdapter.generateCommands(toSet, toUnset);
           console.log(commands);
-          
+
           // Update state
           stateManager.removeProfiles(toRemove, toKeep, toUnset);
-          
+
           if (options.global) {
             systemEnvWriter.update(toSet, toUnset);
           }
-          
+
           return;
         }
 
         if (options.emitHuman) {
-          const message = formatter.formatRemove(
+          const message = formatter.formatUnuse(
             toRemove,
             remainingProfiles,
             toUnset.length
@@ -90,7 +90,7 @@ export function createRemoveCommand(
 
         if (formatter['jsonMode']) {
           const output = {
-            action: 'remove',
+            action: 'unuse',
             removed_profiles: toRemove,
             remaining_profiles: remainingProfiles,
             unset_variables: toUnset,
@@ -98,7 +98,7 @@ export function createRemoveCommand(
           };
           console.log(JSON.stringify(output, null, 2));
         } else {
-          console.log(formatter.formatRemove(
+          console.log(formatter.formatUnuse(
             toRemove,
             remainingProfiles,
             toUnset.length

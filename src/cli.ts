@@ -13,7 +13,7 @@ import {
   createInstallCommand,
   createUseCommand,
   createAddCommand,
-  createRemoveCommand,
+  createUnuseCommand,
   createResetCommand,
   createStatusCommand,
   createWhichCommand,
@@ -73,7 +73,7 @@ program.addCommand(createAddCommand(
   systemEnvWriter
 ));
 
-program.addCommand(createRemoveCommand(
+program.addCommand(createUnuseCommand(
   formatter,
   store,
   resolver,
