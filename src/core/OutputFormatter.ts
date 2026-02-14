@@ -193,6 +193,30 @@ export class OutputFormatter {
   }
 
   /**
+   * Format refresh confirmation
+   */
+  formatRefresh(
+    profiles: string[],
+    variables: Record<string, EnvVariable>,
+    conflicts: Conflict[]
+  ): string {
+    const lines: string[] = [];
+
+    lines.push(chalk.green('✓ ') + chalk.bold(`Refreshed: ${profiles.join(', ')}`));
+    lines.push(chalk.dim(`  ${Object.keys(variables).length} variable(s) updated`));
+
+    if (conflicts.length > 0) {
+      lines.push('');
+      lines.push(chalk.yellow('⚠ Conflicts (last profile wins):'));
+      for (const conflict of conflicts) {
+        lines.push(chalk.yellow(`  ${conflict.variable}: ${conflict.profiles.join(' → ')}`));
+      }
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
    * Format explain output (plain text for LLM context)
    */
   formatExplain(status: StatusOutput): string {

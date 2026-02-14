@@ -12,7 +12,7 @@ export function createInitCommand(
     .description('Scaffold a profile from an industry template')
     .option('--template <name>', 'Template name (claude, openai, aws, supabase, stripe, vercel)')
     .option('--name <name>', 'Custom profile name (defaults to template name)')
-    .option('--global', 'Create in global ~/.envize/profiles/')
+    .option('-g, --global', 'Create in global ~/.envize/profiles/')
     .action(async (options) => {
       try {
         if (!options.template) {

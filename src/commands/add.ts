@@ -17,7 +17,7 @@ export function createAddCommand(
   return new Command('add')
     .description('Add profiles to the currently active set')
     .argument('<profiles...>', 'Profile names to add')
-    .option('--global', 'Apply globally across all shell sessions')
+    .option('-g, --global', 'Apply globally across all shell sessions')
     .option('--emit-shell', 'Output shell commands for eval')
     .option('--emit-human', 'Output human-readable confirmation')
     .action(async (profileNames: string[], options) => {

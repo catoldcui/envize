@@ -12,7 +12,7 @@ export function createResetCommand(
 ): Command {
   return new Command('reset')
     .description('Restore shell to pre-envize state (removes all)')
-    .option('--global', 'Also clear global (cross-session) state')
+    .option('-g, --global', 'Also clear global (cross-session) state')
     .option('--emit-shell', 'Output shell commands for eval')
     .option('--emit-human', 'Output human-readable confirmation')
     .action(async (options) => {

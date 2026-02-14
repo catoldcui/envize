@@ -15,7 +15,7 @@ export function createImportCommand(
     .option('--name <name>', 'Profile name (defaults to filename without .env)')
     .option('--description <desc>', 'Profile description')
     .option('--tags <tags>', 'Comma-separated tags')
-    .option('--global', 'Import to global ~/.envize/profiles/')
+    .option('-g, --global', 'Import to global ~/.envize/profiles/')
     .action(async (file: string, options) => {
       try {
         // Determine profile name

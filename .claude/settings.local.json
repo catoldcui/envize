@@ -10,7 +10,16 @@
       "Bash(test:*)",
       "Bash(npm test:*)",
       "Bash(npx tsc:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(./dist/cli.js refresh:*)",
+      "Bash(./dist/cli.js:*)",
+      "Bash(npm link:*)",
+      "Bash(envize --version:*)",
+      "Bash(envize refresh --help:*)",
+      "Bash(envize hook --help:*)",
+      "Bash(envize hook:*)",
+      "Bash(envize --help:*)",
+      "Bash(envize use --help:*)"
     ]
   }
 }

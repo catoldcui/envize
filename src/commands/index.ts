@@ -1,8 +1,9 @@
-export { createInstallCommand } from './install.js';
+export { createHookCommand } from './hook.js';
 export { createUseCommand } from './use.js';
 export { createAddCommand } from './add.js';
 export { createUnuseCommand } from './unuse.js';
 export { createResetCommand } from './reset.js';
+export { createRefreshCommand } from './refresh.js';
 export { createStatusCommand } from './status.js';
 export { createWhichCommand } from './which.js';
 export { createLsCommand } from './ls.js';

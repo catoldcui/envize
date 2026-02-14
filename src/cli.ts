@@ -10,11 +10,12 @@ import {
   OutputFormatter,
 } from './core/index.js';
 import {
-  createInstallCommand,
+  createHookCommand,
   createUseCommand,
   createAddCommand,
   createUnuseCommand,
   createResetCommand,
+  createRefreshCommand,
   createStatusCommand,
   createWhichCommand,
   createLsCommand,
@@ -53,7 +54,7 @@ program
   });
 
 // Register all commands
-program.addCommand(createInstallCommand(formatter));
+program.addCommand(createHookCommand());
 
 program.addCommand(createUseCommand(
   formatter,
@@ -87,6 +88,14 @@ program.addCommand(createResetCommand(
   stateManager,
   shellAdapter,
   systemEnvWriter
+));
+
+program.addCommand(createRefreshCommand(
+  formatter,
+  store,
+  resolver,
+  stateManager,
+  shellAdapter
 ));
 
 program.addCommand(createStatusCommand(formatter, stateManager));

@@ -17,7 +17,7 @@ export function createUnuseCommand(
   return new Command('unuse')
     .description('Deactivate profiles from the currently active set')
     .argument('<profiles...>', 'Profile names to deactivate')
-    .option('--global', 'Also remove from global (cross-session) state')
+    .option('-g, --global', 'Also remove from global (cross-session) state')
     .option('--emit-shell', 'Output shell commands for eval')
     .option('--emit-human', 'Output human-readable confirmation')
     .action(async (profileNames: string[], options) => {

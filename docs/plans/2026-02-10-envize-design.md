@@ -68,13 +68,14 @@ Three commands manage the active set:
 
 | Command | Description |
 |---|---|
-| `envize install` | One-time setup: injects shell function wrapper into shell config |
+| `envize hook` | Output shell hook for eval (add to shell rc file) |
 | `envize use <profiles...>` | Apply one or more profiles to current shell (replaces active set) |
 | `envize use <profiles...> --global` | Apply globally across shell sessions |
 | `envize add <profiles...>` | Add profiles to the currently active set |
 | `envize remove <profiles...>` | Remove profiles from the currently active set |
 | `envize reset` | Restore shell to pre-envize state (removes all) |
 | `envize reset --global` | Remove global env vars from shell hook file |
+| `envize refresh` | Refresh session with latest profile values from storage |
 | `envize status` | Show active profiles and all set variables with source |
 | `envize which <VAR>` | Show which profile set a variable and its value |
 | `envize create <name>` | Create a new profile interactively |
@@ -171,10 +172,10 @@ All commands support `--json` for structured JSON output.
 
 ─────────────────────────────────────────────────────────
   Shell Function Wrapper (bash/zsh/fish)
-  Injected by `envize install` into rc file
+  Added via eval "$(envize hook)" in shell rc file
 
-  envize use/add/remove/reset → eval $(envize ... --emit-shell)
-  envize *                    → passthrough to binary
+  envize use/add/remove/reset/refresh → eval $(envize ... --emit-shell)
+  envize *                             → passthrough to binary
 ─────────────────────────────────────────────────────────
 ```
 
@@ -220,13 +221,13 @@ A child process cannot modify the parent shell's environment. Envize solves this
 
 #### Shell Function Wrapper
 
-`envize install` injects a shell function into the user's rc file. This function intercepts mutating commands (`use`, `add`, `remove`, `reset`) and `eval`s the binary's stdout. Non-mutating commands (`ls`, `status`, `explain`) pass through directly.
+Users add `eval "$(envize hook)"` to their shell rc file. The `envize hook` command outputs a shell function that intercepts mutating commands (`use`, `add`, `remove`, `reset`, `refresh`) and `eval`s the binary's stdout. Non-mutating commands (`ls`, `status`, `explain`) pass through directly.
 
 **bash/zsh:**
 ```bash
 envize() {
   case "$1" in
-    use|add|remove|reset)
+    use|add|remove|reset|refresh)
       local output
       output="$(command envize "$@" --emit-shell 2>/dev/null)"
       if [ $? -eq 0 ]; then
@@ -247,7 +248,7 @@ envize() {
 ```fish
 function envize
   switch $argv[1]
-    case use add remove reset
+    case use add remove reset refresh
       set -l output (command envize $argv --emit-shell 2>/dev/null)
       if test $status -eq 0
         eval $output
@@ -313,7 +314,7 @@ Updated on every `envize use` and `envize reset`. Read by `status`, `which`, and
 Writes env vars to the shell hook file for cross-session global persistence:
 
 - Writes `~/.envize/active.sh` containing export statements for the global variables
-- The shell function wrapper sources this file on shell startup (injected during `envize install`)
+- The shell function wrapper sources this file on shell startup (included in `envize hook` output)
 
 `envize reset --global` clears `~/.envize/active.sh` and removes global variables.
 
@@ -361,11 +362,9 @@ This enables teams that need `.env` files for Docker, docker-compose, or IDE com
 
 ```
 # Install envize (e.g., via npm, brew, cargo)
-$ envize install
-  -> Detects shell (bash/zsh/fish)
-  -> Injects shell function wrapper into ~/.zshrc (or ~/.bashrc, config.fish)
-  -> Creates ~/.envize/profiles/ directory
-  -> Creates ~/.envize/active.sh (for global mode)
+# Then add to your shell rc file:
+#   bash/zsh: eval "$(envize hook)"
+#   fish: envize hook fish | source
 
 # Create a profile from template
 $ envize init --template claude
@@ -411,7 +410,7 @@ $ envize export --dotenv > .env
 
 - **Platforms:** macOS, Linux
 - **Shells:** bash, zsh, fish
-- **Core commands:** `install`, `use`, `add`, `remove`, `reset`, `status`, `which`, `ls`, `create`, `edit`, `rm`
+- **Core commands:** `hook`, `use`, `add`, `remove`, `reset`, `refresh`, `status`, `which`, `ls`, `create`, `edit`, `rm`
 - **Composability:** multi-profile merging with last-wins conflict resolution
 - **Global mode:** shell-level only (`~/.envize/active.sh`)
 - **State tracking:** `~/.envize/state.json` for active profile state

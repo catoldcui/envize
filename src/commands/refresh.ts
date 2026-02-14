@@ -3,53 +3,67 @@ import { ProfileStore } from '../core/ProfileStore.js';
 import { ProfileResolver } from '../core/ProfileResolver.js';
 import { ShellAdapter } from '../core/ShellAdapter.js';
 import { StateManager } from '../core/StateManager.js';
-import { SystemEnvWriter } from '../core/SystemEnvWriter.js';
 import { OutputFormatter } from '../core/OutputFormatter.js';
-import type { EnvVariable } from '../types.js';
 
-export function createUseCommand(
+export function createRefreshCommand(
   formatter: OutputFormatter,
   store: ProfileStore,
   resolver: ProfileResolver,
   stateManager: StateManager,
-  shellAdapter: ShellAdapter,
-  systemEnvWriter: SystemEnvWriter
+  shellAdapter: ShellAdapter
 ): Command {
-  return new Command('use')
-    .description('Apply one or more profiles to current shell (replaces active set)')
-    .argument('<profiles...>', 'Profile names to activate')
-    .option('-g, --global', 'Apply globally across all shell sessions')
+  return new Command('refresh')
+    .description('Refresh current session with latest profile values from storage')
     .option('--emit-shell', 'Output shell commands for eval')
     .option('--emit-human', 'Output human-readable confirmation')
-    .action(async (profileNames: string[], options) => {
+    .action(async (options) => {
       try {
-        // Validate all profiles exist
+        // Get current active profiles from state
+        const currentState = stateManager.load();
+        const profileNames = currentState.active_profiles;
+
+        if (profileNames.length === 0) {
+          if (options.emitShell) {
+            // Silent exit - nothing to refresh
+            process.exit(0);
+          }
+          console.log(formatter.formatInfo('No active profiles to refresh'));
+          return;
+        }
+
+        // Verify all profiles still exist
+        const missingProfiles: string[] = [];
         for (const name of profileNames) {
           if (!store.profileExists(name)) {
-            if (options.emitShell) {
-              // Silent fail for shell mode - error will be shown via fallback
-              process.exit(1);
-            }
-            console.error(formatter.formatError(`Profile not found: ${name}`));
-            process.exit(1);
+            missingProfiles.push(name);
           }
         }
 
-        // Resolve profiles
+        if (missingProfiles.length > 0) {
+          if (options.emitShell) {
+            process.exit(1);
+          }
+          console.error(formatter.formatError(
+            `Some profiles no longer exist: ${missingProfiles.join(', ')}`
+          ));
+          console.error(formatter.formatInfo(
+            'Run "envize reset" to clear state, or "envize use" with valid profiles'
+          ));
+          process.exit(1);
+        }
+
+        // Re-resolve profiles to get latest values
         const resolved = resolver.resolve(profileNames);
 
-        // Get current state for diff
-        const currentState = stateManager.load();
-        const currentVars = currentState.variables;
-
-        // Compute what to set and unset
+        // Compute what to set (all variables from resolved profiles)
         const toSet: Record<string, string> = {};
         for (const [key, envVar] of Object.entries(resolved.variables)) {
           toSet[key] = envVar.value;
         }
 
+        // Compute what to unset (variables in old state but not in new resolution)
         const toUnset: string[] = [];
-        for (const key of Object.keys(currentVars)) {
+        for (const key of Object.keys(currentState.variables)) {
           if (!resolved.variables[key]) {
             toUnset.push(key);
           }
@@ -60,21 +74,16 @@ export function createUseCommand(
           // Output shell commands for eval
           const commands = shellAdapter.generateCommands(toSet, toUnset);
           console.log(commands);
-          
-          // Update state
+
+          // Update state with refreshed values
           stateManager.update(profileNames, resolved.variables);
-          
-          // Handle global
-          if (options.global) {
-            systemEnvWriter.write(toSet);
-          }
-          
+
           return;
         }
 
         if (options.emitHuman) {
           // Output human-readable confirmation to stderr
-          const message = formatter.formatActivation(
+          const message = formatter.formatRefresh(
             profileNames,
             resolved.variables,
             resolved.conflicts
@@ -84,26 +93,20 @@ export function createUseCommand(
         }
 
         // Default mode: human-readable output
-        // Update state
+        // Update state with refreshed values
         stateManager.update(profileNames, resolved.variables);
-
-        // Handle global
-        if (options.global) {
-          systemEnvWriter.write(toSet);
-        }
 
         // Format output
         if (formatter['jsonMode']) {
           const output = {
-            action: 'use',
+            action: 'refresh',
             profiles: profileNames,
             variables: resolved.variables,
             conflicts: resolved.conflicts,
-            global: options.global ?? false,
           };
           console.log(JSON.stringify(output, null, 2));
         } else {
-          console.log(formatter.formatActivation(
+          console.log(formatter.formatRefresh(
             profileNames,
             resolved.variables,
             resolved.conflicts

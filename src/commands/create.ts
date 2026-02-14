@@ -12,7 +12,7 @@ export function createCreateCommand(
     .description('Create a new profile interactively')
     .argument('<name>', 'Profile name')
     .option('--local', 'Create in local .envize/profiles/ (default)')
-    .option('--global', 'Create in global ~/.envize/profiles/')
+    .option('-g, --global', 'Create in global ~/.envize/profiles/')
     .option('--description <desc>', 'Profile description')
     .option('--tags <tags>', 'Comma-separated tags')
     .action(async (name: string, options) => {
