@@ -95,6 +95,19 @@ VERCEL_ORG_ID=<your-org-id-here>
 VERCEL_PROJECT_ID=<your-project-id-here>
 `,
     });
+
+    this.register({
+      name: 'qwen',
+      description: 'Qwen AI API configuration',
+      tags: ['ai', 'qwen', 'llm'],
+      content: `# @description: Qwen AI API configuration using {{QWEN_MODEL}}
+# @tags: ai, qwen, llm
+
+QWEN_API_KEY=<your-api-key-here>
+QWEN_MODEL=qwen-max
+QWEN_BASE_URL=https://dashscope.aliyuncs.com/api/v1
+`,
+    });
   }
 
   /**
